@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocTrans Master - Cyber Rock 500-Book Turbo Translator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyberDark: '#070A10',
+            cyberCard: '#0D131F',
+            cyberBorder: '#1E293B',
+            neonCyan: '#00F2FE',
+            neonLime: '#00FF87',
+            neonPink: '#F72585',
+            neonPurple: '#7928CA'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+    body { font-family: 'Space Grotesk', sans-serif; background-color: #070A10; color: #F1F5F9; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    /* Cyber Rock Glows */
+    .glow-cyan { box-shadow: 0 0 25px rgba(0, 242, 254, 0.25); }
+    .glow-lime { box-shadow: 0 0 25px rgba(0, 255, 135, 0.25); }
+    .glow-pink { box-shadow: 0 0 25px rgba(247, 37, 133, 0.25); }
+    .neon-text-cyan { text-shadow: 0 0 12px rgba(0, 242, 254, 0.6); }
+    .neon-text-lime { text-shadow: 0 0 12px rgba(0, 255, 135, 0.6); }
+
+    /* Glass Effect */
+    .rock-panel { background: rgba(13, 19, 31, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .rock-card { background: rgba(18, 26, 43, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.06); }
+    .rock-card:hover { border-color: rgba(0, 242, 254, 0.3); }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #070A10; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00F2FE; }
+
+    /* Comparison Slider */
+    .comparison-container { position: relative; width: 100%; overflow: hidden; border-radius: 0.75rem; user-select: none; }
+    .comparison-img { display: block; width: 100%; height: auto; pointer-events: none; }
+    .comparison-overlay { position: absolute; top: 0; left: 0; width: 50%; height: 100%; overflow: hidden; }
+    .comparison-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: #00F2FE; cursor: ew-resize; transform: translateX(-50%); box-shadow: 0 0 15px #00F2FE; }
+    .comparison-handle-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; background: #070A10; border: 2px solid #00F2FE; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #00F2FE; font-size: 11px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-neonCyan selection:text-black">
+
+  <!-- Floating Toast Notifications -->
+  <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- Top Rock Navigation Bar -->
+  <header class="rock-panel sticky top-0 z-50 px-6 py-3.5 border-b border-slate-800/80 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center space-x-3.5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-pink-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-cyan-500/30">
+          <i class="fa-solid fa-bolt-lightning animate-pulse"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-black tracking-wider text-white">DOCTRANS <span class="text-neonCyan neon-text-cyan">TURBO</span></span>
+            <span class="px-2 py-0.5 text-[9px] font-black uppercase rounded bg-neonLime/10 text-neonLime border border-neonLime/30">500-Books Engine</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">Bilingual PDF & FB2 Engine with Deep Diagram OCR</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center space-x-1 p-1 bg-cyberDark rounded-xl border border-slate-800">
+        <button onclick="switchTab('doc-tab')" id="tab-btn-doc" class="tab-button active px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 text-black shadow-lg shadow-cyan-500/20 transition">
+          <i class="fa-solid fa-file-pdf"></i>
+          <span>Document Studio</span>
+        </button>
+        <button onclick="switchTab('diagram-tab')" id="tab-btn-diagram" class="tab-button px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-wand-magic-sparkles text-neonPink"></i>
+          <span>Diagram OCR Studio</span>
+        </button>
+        <button onclick="switchTab('batch-tab')" id="tab-btn-batch" class="tab-button px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-layer-group text-neonLime"></i>
+          <span>Batch 500-Books</span>
+        </button>
+        <button onclick="switchTab('reader-tab')" id="tab-btn-reader" class="tab-button px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-book-open text-purple-400"></i>
+          <span>Reader & Output</span>
+        </button>
+      </nav>
+
+      <!-- Live Speed HUD & Cache Badge -->
+      <div class="flex items-center space-x-3">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-cyberDark border border-slate-800 text-[11px]">
+          <span class="w-2 h-2 rounded-full bg-neonLime animate-ping"></span>
+          <span class="text-slate-400">API Health:</span>
+          <span class="text-neonLime font-bold mono">100% UNLIMITED</span>
+        </div>
+        <div id="cache-pill" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyberDark border border-slate-800 text-[11px] text-slate-300">
+          <i class="fa-solid fa-database text-amber-400"></i>
+          <span id="cache-count" class="mono font-semibold">Loading...</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="max-w-7xl w-full mx-auto p-4 md:p-8 flex-grow space-y-6">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: DOCUMENT STUDIO -->
+    <!-- ========================================== -->
+    <section id="doc-tab" class="tab-content space-y-6">
+
+      <!-- Speed & Mode Selector Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Turbo Mode Card -->
+        <div onclick="selectSpeedMode('turbo')" id="mode-turbo-card" class="rock-card rounded-2xl p-4 cursor-pointer border-2 border-cyan-500 bg-cyan-500/5 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-neonCyan flex items-center gap-1.5">
+              <i class="fa-solid fa-gauge-high"></i> TURBO ROCK SPEED
+            </span>
+            <span class="px-2 py-0.5 rounded text-[9px] font-black bg-cyan-500/20 text-cyan-300">RECOMMENDED</span>
+          </div>
+          <p class="text-xs text-slate-300">Parallel page batching + Smart Diagram OCR. Translates a 500-page book in minutes without freezing.</p>
+        </div>
+
+        <!-- Ultra Hyper Mode Card -->
+        <div onclick="selectSpeedMode('hyper')" id="mode-hyper-card" class="rock-card rounded-2xl p-4 cursor-pointer border border-slate-800 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-neonLime flex items-center gap-1.5">
+              <i class="fa-solid fa-bolt"></i> ULTRA HYPER (TEXT ONLY)
+            </span>
+            <span class="px-2 py-0.5 rounded text-[9px] font-black bg-lime-500/20 text-lime-300">FASTEST</span>
+          </div>
+          <p class="text-xs text-slate-400">Instant book text translation. Keeps images as original graphics. Completes 500 pages in under 60 seconds!</p>
+        </div>
+
+        <!-- Deep Matrix OCR Card -->
+        <div onclick="selectSpeedMode('matrix')" id="mode-matrix-card" class="rock-card rounded-2xl p-4 cursor-pointer border border-slate-800 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-neonPink flex items-center gap-1.5">
+              <i class="fa-solid fa-brain"></i> DEEP MATRIX OCR
+            </span>
+            <span class="px-2 py-0.5 rounded text-[9px] font-black bg-pink-500/20 text-pink-300">THOROUGH</span>
+          </div>
+          <p class="text-xs text-slate-400">Deep CRAFT neural scan for every illustration and technical memory schema.</p>
+        </div>
+      </div>
+
+      <!-- Main Upload & Control Center -->
+      <div class="rock-panel rounded-3xl p-6 md:p-8 shadow-2xl relative space-y-6">
+
+        <!-- Multi-Book & Folder Dropzone -->
+        <div id="doc-dropzone" class="border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 rounded-2xl p-7 text-center transition bg-cyberDark/60 hover:bg-cyberDark group glow-cyan">
+          <input type="file" id="doc-file-input" class="hidden" accept=".pdf,.fb2" multiple>
+          <input type="file" id="doc-folder-input" class="hidden" webkitdirectory directory multiple>
+          
+          <div class="flex flex-col items-center justify-center space-y-3.5">
+            <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 text-neonCyan group-hover:scale-110 flex items-center justify-center text-3xl transition duration-300 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+              <h3 class="text-base md:text-lg font-bold text-white">
+                Drag & Drop <span class="text-neonCyan">PDF</span> or <span class="text-neonLime">FB2</span> Books Here (10+ or Whole Folder)
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">Multi-Book Batch Queue with Sequential Overnight Processing &amp; Zero Russian Residuals</p>
+            </div>
+
+            <!-- Badges -->
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+              <span class="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-neonCyan text-[11px] font-bold">
+                <i class="fa-solid fa-check-double mr-1"></i> Max 10, 50, 100+ Books
+              </span>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-neonLime text-[11px] font-bold">
+                <i class="fa-solid fa-folder-tree mr-1"></i> Folder Auto-Scan
+              </span>
+              <span class="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
+                <i class="fa-solid fa-moon mr-1"></i> Crash-Proof Overnight Run
+              </span>
+              <span class="px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[11px] font-bold">
+                <i class="fa-solid fa-hard-drive mr-1"></i> Auto-Saves to D:\Apnp\outputbook
+              </span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button type="button" onclick="document.getElementById('doc-file-input').click()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-black text-xs font-black uppercase tracking-wider shadow-lg transition flex items-center gap-2">
+                <i class="fa-solid fa-files text-sm"></i> Select Books (Multiple / 10+)
+              </button>
+              <button type="button" onclick="document.getElementById('doc-folder-input').click()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-neonLime to-emerald-500 hover:from-lime-300 hover:to-emerald-400 text-black text-xs font-black uppercase tracking-wider shadow-lg transition flex items-center gap-2">
+                <i class="fa-solid fa-folder-open text-sm"></i> Select Entire Folder
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Books Queue Preview Header Bar -->
+        <div id="doc-file-info" class="hidden p-4 rounded-2xl bg-cyberDark border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-3">
+          <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-neonCyan flex items-center justify-center text-2xl">
+              <i class="fa-solid fa-books"></i>
+            </div>
+            <div>
+              <p id="doc-name" class="text-sm font-bold text-white truncate max-w-lg">0 books selected</p>
+              <p id="doc-size" class="text-xs text-slate-400 mono">0.0 MB total</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="doc-add-more-btn" onclick="document.getElementById('doc-file-input').click()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">
+              <i class="fa-solid fa-plus mr-1"></i> Add More
+            </button>
+            <button id="doc-remove-btn" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold border border-slate-800 transition">
+              <i class="fa-solid fa-trash-can mr-1"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Auto-Convert & Destination Options Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs">
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" id="auto-convert-toggle" checked class="w-4 h-4 accent-neonLime rounded cursor-pointer">
+            <span class="text-slate-200 font-semibold">
+              <i class="fa-solid fa-bolt text-neonLime mr-1"></i> Auto-Start Converting ("વારાફરતી") Immediately on Selection / Drop
+            </span>
+          </label>
+          <div class="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+            <i class="fa-solid fa-folder-check text-neonCyan"></i> Output Destination:
+            <span class="text-neonCyan font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">D:\Apnp\outputbook</span>
+          </div>
+        </div>
+
+        <!-- Controls Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <!-- Engine Mode -->
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <i class="fa-solid fa-microchip text-fuchsia-400 mr-1"></i> AI Translation Engine
+            </label>
+            <select id="doc-engine-mode" class="w-full bg-cyberDark border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-fuchsia-400 transition">
+              <option value="hybrid" selected>⚡ Hybrid (Fast + Neural Fallback)</option>
+              <option value="offline">🛡️ 100% Offline AI (No API Limits)</option>
+            </select>
+          </div>
+
+          <!-- Source Lang -->
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <i class="fa-solid fa-globe text-neonCyan mr-1"></i> Source Language
+            </label>
+            <select id="doc-source-lang" class="w-full bg-cyberDark border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-neonCyan transition">
+              <option value="auto">✨ Auto-Detect (Auto-Detect)</option>
+              <option value="ru" selected>🇷🇺 Russian (Русский)</option>
+              <option value="es">🇪🇸 Spanish (Español)</option>
+              <option value="fr">🇫🇷 French (Français)</option>
+              <option value="de">🇩🇪 German (Deutsch)</option>
+              <option value="zh">🇨🇳 Chinese (Simplified)</option>
+              <option value="ja">🇯🇵 Japanese (日本語)</option>
+              <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+              <option value="gu">🇮🇳 Gujarati (ગુજરાતી)</option>
+            </select>
+          </div>
+
+          <!-- Target Lang -->
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <i class="fa-solid fa-flag text-neonLime mr-1"></i> Target Language
+            </label>
+            <select id="doc-target-lang" class="w-full bg-cyberDark border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-neonLime transition">
+              <option value="en" selected>🇬🇧 English (EN)</option>
+              <option value="gu">🇮🇳 Gujarati (ગુજરાતી)</option>
+              <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+              <option value="es">🇪🇸 Spanish</option>
+              <option value="de">🇩🇪 German</option>
+            </select>
+          </div>
+
+          <!-- Quick Range Selector -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+              <span><i class="fa-solid fa-layer-group text-amber-400 mr-1"></i> Page Range Options</span>
+              <span class="text-[10px] text-slate-400 lowercase">Leave blank for all pages</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="doc-page-range" placeholder="e.g. 1-10 or 1-50 (Blank = Full 500 Pages)" class="flex-grow bg-cyberDark border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-200 mono focus:outline-none focus:border-neonCyan transition">
+              <button onclick="setPageRangePreset('1-10')" class="px-2.5 py-2 rounded-lg bg-cyberDark hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-300 font-semibold transition">1-10</button>
+              <button onclick="setPageRangePreset('1-50')" class="px-2.5 py-2 rounded-lg bg-cyberDark hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-300 font-semibold transition">1-50</button>
+              <button onclick="setPageRangePreset('')" class="px-2.5 py-2 rounded-lg bg-cyberDark hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-300 font-semibold transition">Full</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden checkbox tied to mode cards (unchecked by default for Turbo 30 p/s speed) -->
+        <input type="checkbox" id="doc-ocr-images" class="hidden">
+
+        <!-- Action Bar: Launch & Cancel -->
+        <div class="flex items-center justify-between pt-2">
+          <div class="flex items-center gap-3 text-xs text-slate-400">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield text-neonLime"></i> Rate-Limit Proof</span>
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-memory text-neonCyan"></i> Auto Memory Inpaint</span>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <button id="doc-cancel-btn" onclick="cancelCurrentJob()" class="hidden px-6 py-3.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-black uppercase tracking-wider transition">
+              <i class="fa-solid fa-stop mr-1.5"></i> Abort Run
+            </button>
+            <button id="doc-start-btn" disabled class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-indigo-500 to-neonLime text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/30 disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-2.5 transition">
+              <i class="fa-solid fa-rocket text-sm"></i>
+              <span>START TURBO TRANSLATION</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SPEEDOMETER HUD & LIVE PROGRESS CARD -->
+        <div id="doc-progress-box" class="hidden mt-6 pt-6 border-t border-slate-800 space-y-4">
+          
+          <!-- Live Telemetry HUD -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="rock-card rounded-xl p-3 border border-slate-800 text-center">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Pages Completed</span>
+              <p id="hud-pages" class="text-lg font-black text-white mono mt-0.5">0 / 0</p>
+            </div>
+            <div class="rock-card rounded-xl p-3 border border-slate-800 text-center">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Translation Speed</span>
+              <p id="hud-speed" class="text-lg font-black text-neonLime mono mt-0.5">0.0 p/s</p>
+            </div>
+            <div class="rock-card rounded-xl p-3 border border-slate-800 text-center">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Estimated ETA</span>
+              <p id="hud-eta" class="text-lg font-black text-neonCyan mono mt-0.5">Calculating...</p>
+            </div>
+            <div class="rock-card rounded-xl p-3 border border-slate-800 text-center">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Words Converted</span>
+              <p id="hud-words" class="text-lg font-black text-neonPink mono mt-0.5">0</p>
+            </div>
+          </div>
+
+          <!-- Progress Bar with Percentage -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span id="doc-progress-status" class="text-neonCyan mono flex items-center gap-2">
+                <i class="fa-solid fa-spinner fa-spin"></i> Processing...
+              </span>
+              <span id="doc-progress-pct" class="text-neonLime text-base mono">0%</span>
+            </div>
+            <div class="w-full bg-cyberDark h-4 rounded-full overflow-hidden p-0.5 border border-slate-800 shadow-inner">
+              <div id="doc-progress-fill" class="bg-gradient-to-r from-cyan-400 via-indigo-500 to-neonLime h-full rounded-full transition-all duration-200 w-0"></div>
+            </div>
+          </div>
+
+          <!-- Terminal Log -->
+          <div class="rounded-xl bg-cyberDark border border-slate-800 p-3.5 mono text-[11px]">
+            <div class="flex items-center justify-between mb-2 text-slate-500 pb-1.5 border-b border-slate-800 text-[10px]">
+              <span class="font-bold uppercase text-neonCyan"><i class="fa-solid fa-terminal mr-1"></i> Live Turbo Stream</span>
+              <span>Fault-Tolerant Engine</span>
+            </div>
+            <div id="doc-terminal-logs" class="h-28 overflow-y-auto space-y-1 text-slate-300">
+              <p>[System] Ready.</p>
+            </div>
+          </div>
+
+          <!-- Multi-Book Queue Table Card -->
+          <div id="queue-table-card" class="rounded-2xl bg-cyberDark/90 border border-slate-800 p-4 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-800 gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-neonLime animate-pulse"></span>
+                <span class="text-xs font-black uppercase text-neonLime tracking-wider">
+                  <i class="fa-solid fa-list-check mr-1.5"></i> Overnight Conversion Queue ("વારાફરતી")
+                </span>
+                <span id="queue-badge-count" class="px-2.5 py-0.5 rounded-full bg-neonCyan/20 text-neonCyan text-[11px] font-mono font-bold">0 Books</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono text-slate-300 bg-slate-900 px-3 py-1 rounded-lg border border-slate-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-folder-open text-amber-400"></i> Auto-Saved to: <span class="text-neonCyan font-bold">D:\Apnp\outputbook</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Queue Items Scrollable Table -->
+            <div class="max-h-72 overflow-y-auto rounded-xl border border-slate-800/80">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-900/90 text-[10px] uppercase font-bold text-slate-400 sticky top-0 backdrop-blur z-10">
+                  <tr>
+                    <th class="p-2.5 w-12 text-center">#</th>
+                    <th class="p-2.5">Book Title</th>
+                    <th class="p-2.5 w-20 text-center">Type</th>
+                    <th class="p-2.5 w-24">Size</th>
+                    <th class="p-2.5 w-52">Status</th>
+                    <th class="p-2.5 w-28 text-center">Output</th>
+                  </tr>
+                </thead>
+                <tbody id="queue-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Result Ready Card -->
+          <div id="doc-result-card" class="hidden p-5 rounded-2xl bg-neonLime/10 border border-neonLime/30 flex flex-col md:flex-row items-center justify-between gap-4 glow-lime">
+            <div class="flex items-center space-x-3.5">
+              <div class="w-12 h-12 rounded-xl bg-neonLime/20 text-neonLime flex items-center justify-center text-2xl shadow-lg">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-white">Full Book Converted Successfully!</p>
+                <p id="doc-result-filename" class="text-xs text-slate-400 mono">output_translated_en.pdf</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <button id="doc-read-now-btn" class="px-5 py-2.5 rounded-xl bg-cyberDark hover:bg-slate-800 text-white text-xs font-bold border border-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-book-open text-neonCyan"></i> Read in Built-in Viewer
+              </button>
+              <a id="doc-download-link" href="#" download class="px-6 py-2.5 rounded-xl bg-neonLime hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider transition shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Download Book
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: DIAGRAM OCR STUDIO -->
+    <!-- ========================================== -->
+    <section id="diagram-tab" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-3xl rock-panel space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2.5">
+            <i class="fa-solid fa-wand-magic-sparkles text-neonPink"></i>
+            <span>Interactive Diagram OCR & Memory Inpainting Studio</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Instant text detection and replacement on technical diagrams, memory layouts, charts, and terminal screenshots.</p>
+        </div>
+
+        <div id="img-dropzone" class="border-2 border-dashed border-neonPink/40 hover:border-neonPink rounded-2xl p-8 text-center cursor-pointer transition bg-cyberDark/60 group glow-pink">
+          <input type="file" id="img-file-input" class="hidden" accept=".png,.jpg,.jpeg">
+          <div class="flex flex-col items-center space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-neonPink/10 text-neonPink group-hover:scale-110 flex items-center justify-center text-3xl transition border border-neonPink/30">
+              <i class="fa-solid fa-image"></i>
+            </div>
+            <p class="text-sm font-bold text-white">Drop Diagram Image Here (PNG / JPG)</p>
+            <button type="button" class="px-4 py-2 rounded-xl bg-neonPink text-white text-xs font-bold shadow-md">
+              Choose Diagram
+            </button>
+          </div>
+        </div>
+
+        <div id="img-loading" class="hidden text-center py-8">
+          <i class="fa-solid fa-circle-notch fa-spin text-neonPink text-3xl"></i>
+          <p class="text-xs text-slate-300 font-bold mt-3">Inpainting detected text with local background matching...</p>
+        </div>
+
+        <div id="img-results-area" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-neonPink/20 text-neonPink border border-neonPink/40 text-xs font-bold">
+              <i class="fa-solid fa-check mr-1"></i> <span id="img-boxes-count">0</span> Diagram Elements Inpainted
+            </span>
+            <a id="img-download-btn" href="#" download="translated_diagram.png" class="px-4 py-2 rounded-xl bg-neonPink hover:opacity-90 text-white text-xs font-bold transition flex items-center gap-2">
+              <i class="fa-solid fa-download"></i> Download English Diagram
+            </a>
+          </div>
+
+          <!-- Split Slider -->
+          <div class="rock-card rounded-2xl p-4 border border-slate-800">
+            <div id="slider-box" class="comparison-container border border-slate-700 shadow-2xl">
+              <img id="img-after" src="" alt="Translated" class="comparison-img">
+              <div id="slider-overlay" class="comparison-overlay">
+                <img id="img-before" src="" alt="Original" class="comparison-img">
+              </div>
+              <div id="slider-handle" class="comparison-handle">
+                <div class="comparison-handle-btn">
+                  <i class="fa-solid fa-arrows-left-right"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detection breakdown table -->
+          <div class="rock-card rounded-2xl p-4 border border-slate-800 overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400">
+                  <th class="p-2.5">#</th>
+                  <th class="p-2.5">Foreign Detected Text</th>
+                  <th class="p-2.5">English Translation</th>
+                  <th class="p-2.5">Confidence</th>
+                </tr>
+              </thead>
+              <tbody id="ocr-table-body" class="divide-y divide-slate-800 text-slate-300"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: BATCH 500-BOOKS CONVERTER -->
+    <!-- ========================================== -->
+    <section id="batch-tab" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-3xl rock-panel space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2.5">
+            <i class="fa-solid fa-layer-group text-neonLime"></i>
+            <span>Batch 500-Books High-Throughput Converter</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Scan entire library directories and translate multiple books automatically without interruption.</p>
+        </div>
+
+        <!-- Quick Directory Chips -->
+        <div class="space-y-2">
+          <label class="text-[11px] font-black uppercase tracking-wider text-slate-400">Library Presets (Click to Load):</label>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-neonLime/40 text-neonLime hover:bg-neonLime hover:text-black font-bold transition">
+              <i class="fa-solid fa-folder-tree mr-1"></i> Entire Library (All 320+ Books)
+            </button>
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main\\exploits')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-slate-700 text-slate-300 hover:border-neonCyan hover:text-white transition">
+              exploits (14)
+            </button>
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main\\malware')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-slate-700 text-slate-300 hover:border-neonCyan hover:text-white transition">
+              malware (40)
+            </button>
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main\\reverse')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-slate-700 text-slate-300 hover:border-neonCyan hover:text-white transition">
+              reverse (34)
+            </button>
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main\\pentest')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-slate-700 text-slate-300 hover:border-neonCyan hover:text-white transition">
+              pentest (16)
+            </button>
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main\\web')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-slate-700 text-slate-300 hover:border-neonCyan hover:text-white transition">
+              web (18)
+            </button>
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main\\wasm')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-slate-700 text-slate-300 hover:border-neonCyan hover:text-white transition">
+              wasm (22)
+            </button>
+            <button onclick="setBatchFolder('d:\\Python books tech\\hacking_books_ru-main\\hacking_books_ru-main\\phrack')" class="px-3 py-1.5 rounded-lg bg-cyberDark border border-slate-700 text-slate-300 hover:border-neonCyan hover:text-white transition">
+              phrack (144)
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3">
+          <input type="text" id="batch-folder-input" value="d:\Python books tech\hacking_books_ru-main\hacking_books_ru-main" placeholder="Folder path" class="flex-grow bg-cyberDark border border-slate-700 rounded-xl px-4 py-3 text-xs text-slate-200 mono focus:outline-none focus:border-neonLime">
+          <button onclick="scanDirectory()" class="px-6 py-3 rounded-xl bg-neonLime text-black text-xs font-black uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-neonLime/20">
+            <i class="fa-solid fa-magnifying-glass"></i> Scan Folder
+          </button>
+        </div>
+
+        <!-- Batch Settings Row -->
+        <div class="flex flex-wrap items-center gap-6 pt-2 pb-2 border-y border-slate-800 text-xs">
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+            <input type="checkbox" id="batch-recursive-chk" checked class="w-4 h-4 accent-neonLime rounded">
+            <span>Include Subfolders (Recursive)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+            <input type="checkbox" id="batch-skip-existing-chk" checked class="w-4 h-4 accent-neonLime rounded">
+            <span>Skip already translated books</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 font-bold">Engine:</span>
+            <select id="batch-engine-mode" class="bg-cyberDark border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white mono">
+              <option value="hybrid" selected>⚡ Hybrid (Fast + Offline Fallback)</option>
+              <option value="offline">🛡️ 100% Offline AI (CPU Matrix)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="batch-files-area" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <span id="batch-count-badge" class="px-3 py-1 rounded-full bg-neonLime/10 text-neonLime text-xs font-bold border border-neonLime/30">0 Books Found</span>
+            <button id="batch-run-btn" onclick="startBatchTranslation()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-neonLime to-cyan-400 text-black text-xs font-black uppercase tracking-wider transition shadow-lg flex items-center gap-2 hover:opacity-95">
+              <i class="fa-solid fa-play"></i> Start Batch Translation
+            </button>
+          </div>
+
+          <div class="rock-card rounded-2xl overflow-hidden border border-slate-800 max-h-96 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-cyberDark border-b border-slate-800 text-slate-400 font-semibold sticky top-0">
+                <tr>
+                  <th class="p-3 w-10 text-center"><input type="checkbox" id="batch-check-all" checked onchange="toggleSelectAllBatch()"></th>
+                  <th class="p-3">Book Path / Title</th>
+                  <th class="p-3">Format</th>
+                  <th class="p-3">File Size</th>
+                  <th class="p-3">Page Count</th>
+                  <th class="p-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="batch-table-body" class="divide-y divide-slate-800 text-slate-300"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="batch-progress-box" class="hidden p-5 rounded-2xl bg-cyberDark border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span id="batch-status-text" class="text-neonLime flex items-center gap-2">
+              <i class="fa-solid fa-circle-notch fa-spin text-neonLime"></i>
+              <span>Batch processing...</span>
+            </span>
+            <span id="batch-status-pct" class="text-neonCyan mono font-black text-sm">0%</span>
+          </div>
+
+          <!-- Total Batch Progress Bar -->
+          <div>
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Overall Batch Progress</span>
+              <span id="batch-books-counter" class="mono text-neonLime">0 / 0 Books</span>
+            </div>
+            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden p-0.5 border border-slate-800">
+              <div id="batch-progress-fill" class="bg-gradient-to-r from-neonLime to-neonCyan h-full rounded-full transition-all duration-300 w-0"></div>
+            </div>
+          </div>
+
+          <!-- Current Book Sub Progress Bar -->
+          <div id="batch-sub-progress-area">
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span id="batch-current-file-label" class="truncate max-w-md text-slate-300 font-semibold">Current Book</span>
+              <span id="batch-sub-pct" class="mono text-neonCyan">0%</span>
+            </div>
+            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden p-0.5 border border-slate-800">
+              <div id="batch-sub-progress-fill" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full rounded-full transition-all duration-200 w-0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: READER & LIBRARY -->
+    <!-- ========================================== -->
+    <section id="reader-tab" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-3xl rock-panel space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2.5">
+              <i class="fa-solid fa-book-open text-purple-400"></i>
+              <span>Built-in E-Book Reader & Output Library</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Read your converted books directly in the browser with full page zooming, text search, and printing.</p>
+          </div>
+          <button onclick="loadLibrary()" class="px-4 py-2 rounded-xl bg-cyberDark border border-slate-800 hover:border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh Library
+          </button>
+        </div>
+
+        <div id="reader-viewer-container" class="hidden rock-card rounded-2xl p-4 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span id="reader-current-title" class="text-xs font-bold text-neonCyan mono">Reading: Document.pdf</span>
+            <button onclick="closeReaderViewer()" class="px-3 py-1 rounded-lg bg-cyberDark text-slate-300 hover:text-white text-xs font-semibold">
+              <i class="fa-solid fa-xmark mr-1"></i> Close Reader
+            </button>
+          </div>
+          <iframe id="pdf-viewer-frame" src="" class="w-full h-[650px] rounded-xl border border-slate-800 bg-black"></iframe>
+        </div>
+
+        <div class="rock-card rounded-2xl overflow-hidden border border-slate-800">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-cyberDark border-b border-slate-800 text-slate-400 font-semibold">
+              <tr>
+                <th class="p-3.5">Document File</th>
+                <th class="p-3.5">Format</th>
+                <th class="p-3.5">Size</th>
+                <th class="p-3.5">Date</th>
+                <th class="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="library-table-body" class="divide-y divide-slate-800 text-slate-300">
+              <tr><td colspan="5" class="p-6 text-center text-slate-500">Loading library...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="rock-panel border-t border-slate-800 px-6 py-4 text-center text-xs text-slate-500">
+    DocTrans Master Cyber Rock • High-Throughput 500-Book Edition • Zero-Hang Architecture
+  </footer>
+
+  <script>
+    let currentTaskId = null;
+    let pollInterval = null;
+    let selectedSpeedMode = 'turbo';
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('bg-gradient-to-r', 'from-cyan-500', 'to-indigo-600', 'text-black');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('tab-btn-' + tabId.replace('-tab', ''));
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-gradient-to-r', 'from-cyan-500', 'to-indigo-600', 'text-black');
+      }
+
+      if (tabId === 'reader-tab') loadLibrary();
+    }
+
+    function selectSpeedMode(mode) {
+      selectedSpeedMode = mode;
+      ['turbo', 'hyper', 'matrix'].forEach(m => {
+        const el = document.getElementById(`mode-${m}-card`);
+        if (m === mode) {
+          el.className = 'rock-card rounded-2xl p-4 cursor-pointer border-2 border-cyan-500 bg-cyan-500/10 transition';
+        } else {
+          el.className = 'rock-card rounded-2xl p-4 cursor-pointer border border-slate-800 transition';
+        }
+      });
+      document.getElementById('doc-ocr-images').checked = (mode === 'matrix');
+      const speedHint = mode === 'matrix' ? 'Deep Diagram OCR enabled' : 'Turbo 30 pages/sec enabled';
+      showToast(`Switched mode: ${mode.toUpperCase()} (${speedHint})`, 'info');
+    }
+
+    function setPageRangePreset(range) {
+      document.getElementById('doc-page-range').value = range;
+      showToast(range ? `Set range: ${range}` : 'Set to Full Book', 'info');
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `p-4 rounded-xl rock-panel border border-slate-700 shadow-2xl flex items-center gap-3 text-xs text-slate-200 transform transition-all duration-300 translate-x-full opacity-0 pointer-events-auto`;
+      toast.innerHTML = `<i class="fa-solid fa-bolt text-neonCyan text-base"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
+      setTimeout(() => {
+        toast.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Multi-Book & Folder Drag & Drop Queue Studio
+    let selectedDocFiles = [];
+    const docDropzone = document.getElementById('doc-dropzone');
+    const docFileInput = document.getElementById('doc-file-input');
+    const docFolderInput = document.getElementById('doc-folder-input');
+    const docFileInfo = document.getElementById('doc-file-info');
+    const docName = document.getElementById('doc-name');
+    const docSize = document.getElementById('doc-size');
+    const docStartBtn = document.getElementById('doc-start-btn');
+    const docCancelBtn = document.getElementById('doc-cancel-btn');
+    const docProgressBox = document.getElementById('doc-progress-box');
+    const docProgressFill = document.getElementById('doc-progress-fill');
+    const docProgressStatus = document.getElementById('doc-progress-status');
+    const docProgressPct = document.getElementById('doc-progress-pct');
+    const docTerminalLogs = document.getElementById('doc-terminal-logs');
+    const docResultCard = document.getElementById('doc-result-card');
+    const docResultFilename = document.getElementById('doc-result-filename');
+    const docDownloadLink = document.getElementById('doc-download-link');
+    const docReadNowBtn = document.getElementById('doc-read-now-btn');
+    const autoConvertToggle = document.getElementById('auto-convert-toggle');
+    const queueTableCard = document.getElementById('queue-table-card');
+    const queueTableBody = document.getElementById('queue-table-body');
+    const queueBadgeCount = document.getElementById('queue-badge-count');
+
+    // Drag & Drop Listeners
+    docDropzone.addEventListener('dragover', (e) => { e.preventDefault(); docDropzone.classList.add('border-cyan-400'); });
+    docDropzone.addEventListener('dragleave', () => docDropzone.classList.remove('border-cyan-400'));
+    docDropzone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      docDropzone.classList.remove('border-cyan-400');
+      const files = await getFilesFromDataTransfer(e.dataTransfer);
+      if (files.length > 0) handleSelectedFiles(files);
+    });
+
+    docFileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleSelectedFiles(Array.from(e.target.files));
+    });
+
+    docFolderInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleSelectedFiles(Array.from(e.target.files));
+    });
+
+    // Recursive directory traversal for drag & drop
+    async function getFilesFromDataTransfer(dataTransfer) {
+      const files = [];
+      if (dataTransfer.items && dataTransfer.items.length > 0) {
+        const queue = [];
+        for (let i = 0; i < dataTransfer.items.length; i++) {
+          const item = dataTransfer.items[i];
+          if (item.webkitGetAsEntry) {
+            const entry = item.webkitGetAsEntry();
+            if (entry) queue.push(entry);
+          } else if (item.kind === 'file') {
+            const f = item.getAsFile();
+            if (f) files.push(f);
+          }
+        }
+
+        async function traverseEntry(entry) {
+          if (entry.isFile) {
+            return new Promise(resolve => {
+              entry.file(f => {
+                const ext = f.name.toLowerCase();
+                if (ext.endsWith('.pdf') || ext.endsWith('.fb2')) {
+                  files.push(f);
+                }
+                resolve();
+              }, () => resolve());
+            });
+          } else if (entry.isDirectory) {
+            const dirReader = entry.createReader();
+            return new Promise(resolve => {
+              dirReader.readEntries(async entries => {
+                for (const child of entries) {
+                  await traverseEntry(child);
+                }
+                resolve();
+              }, () => resolve());
+            });
+          }
+        }
+
+        while (queue.length > 0) {
+          const entry = queue.shift();
+          await traverseEntry(entry);
+        }
+      } else if (dataTransfer.files) {
+        for (let i = 0; i < dataTransfer.files.length; i++) {
+          const f = dataTransfer.files[i];
+          const ext = f.name.toLowerCase();
+          if (ext.endsWith('.pdf') || ext.endsWith('.fb2')) {
+            files.push(f);
+          }
+        }
+      }
+      return files;
+    }
+
+    function handleSelectedFiles(files) {
+      const validFiles = files.filter(f => {
+        const ext = f.name.toLowerCase();
+        return ext.endsWith('.pdf') || ext.endsWith('.fb2');
+      });
+
+      if (validFiles.length === 0) {
+        showToast('Please select valid .pdf or .fb2 files.', 'error');
+        return;
+      }
+
+      // Append new files without duplicates by name and size
+      validFiles.forEach(f => {
+        if (!selectedDocFiles.some(existing => existing.name === f.name && existing.size === f.size)) {
+          selectedDocFiles.push(f);
+        }
+      });
+
+      renderSelectedQueuePreview();
+
+      showToast(`Added ${validFiles.length} book(s) to queue. Total: ${selectedDocFiles.length}`, 'info');
+
+      // User requirement: If auto-convert is enabled, start immediately!
+      if (autoConvertToggle && autoConvertToggle.checked) {
+        setTimeout(() => {
+          startQueueConversion();
+        }, 300);
+      }
+    }
+
+    function renderSelectedQueuePreview() {
+      const totalMB = (selectedDocFiles.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(2);
+      const pdfCount = selectedDocFiles.filter(f => f.name.toLowerCase().endsWith('.pdf')).length;
+      const fb2Count = selectedDocFiles.filter(f => f.name.toLowerCase().endsWith('.fb2')).length;
+
+      docName.textContent = `${selectedDocFiles.length} books selected (${pdfCount} PDF, ${fb2Count} FB2)`;
+      docSize.textContent = `${totalMB} MB total • Sequential Overnight Pipeline`;
+      docFileInfo.classList.remove('hidden');
+      docStartBtn.disabled = (selectedDocFiles.length === 0);
+      queueBadgeCount.textContent = `${selectedDocFiles.length} Books`;
+
+      // Render rows into table
+      queueTableBody.innerHTML = selectedDocFiles.map((f, idx) => {
+        const isPdf = f.name.toLowerCase().endsWith('.pdf');
+        const badge = isPdf ? '<span class="px-2 py-0.5 rounded bg-cyan-500/20 text-neonCyan font-bold">PDF</span>' : '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-neonLime font-bold">FB2</span>';
+        const sz = (f.size / (1024 * 1024)).toFixed(2) + ' MB';
+        return `
+          <tr id="queue-row-${idx}" class="hover:bg-slate-800/40 transition">
+            <td class="p-2.5 text-center mono text-slate-500">${idx + 1}</td>
+            <td class="p-2.5 font-semibold text-white truncate max-w-xs" title="${f.name}">${f.name}</td>
+            <td class="p-2.5 text-center">${badge}</td>
+            <td class="p-2.5 mono text-slate-400">${sz}</td>
+            <td id="queue-status-${idx}" class="p-2.5">
+              <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[11px] font-mono">⏳ Queued</span>
+            </td>
+            <td id="queue-action-${idx}" class="p-2.5 text-center text-slate-500 text-[11px] mono">-</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('doc-remove-btn').addEventListener('click', () => {
+      selectedDocFiles = [];
+      docFileInput.value = '';
+      docFolderInput.value = '';
+      docFileInfo.classList.add('hidden');
+      docStartBtn.disabled = true;
+      queueTableBody.innerHTML = '';
+      queueBadgeCount.textContent = '0 Books';
+      showToast('Cleared queue.', 'info');
+    });
+
+    docStartBtn.addEventListener('click', () => {
+      startQueueConversion();
+    });
+
+    async function startQueueConversion() {
+      if (!selectedDocFiles || selectedDocFiles.length === 0) return;
+      docStartBtn.disabled = true;
+      docCancelBtn.classList.remove('hidden');
+      docProgressBox.classList.remove('hidden');
+      docResultCard.classList.add('hidden');
+
+      docProgressFill.style.width = '2%';
+      docProgressPct.textContent = '2%';
+      docProgressStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-neonCyan"></i> Uploading books to overnight queue...';
+
+      const fd = new FormData();
+      selectedDocFiles.forEach(f => fd.append('files', f));
+      fd.append('engine_mode', document.getElementById('doc-engine-mode') ? document.getElementById('doc-engine-mode').value : 'hybrid');
+      fd.append('source_lang', document.getElementById('doc-source-lang').value);
+      fd.append('target_lang', document.getElementById('doc-target-lang').value);
+      fd.append('translate_images', document.getElementById('doc-ocr-images').checked);
+      fd.append('skip_existing', true);
+
+      try {
+        const resp = await fetch('/api/start-batch-upload', { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (data.batch_id) {
+          currentTaskId = data.batch_id;
+          trackQueueBatchProgress(data.batch_id);
+          showToast(`Started queue with ${data.count} books! Converting sequentially into D:\\Apnp\\outputbook...`, 'success');
+        } else {
+          showToast(data.error || 'Failed to start queue', 'error');
+          docStartBtn.disabled = false;
+          docCancelBtn.classList.add('hidden');
+        }
+      } catch (e) {
+        showToast(e.message, 'error');
+        docStartBtn.disabled = false;
+        docCancelBtn.classList.add('hidden');
+      }
+    }
+
+    function trackQueueBatchProgress(batchId) {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(async () => {
+        try {
+          const resp = await fetch('/api/batch-progress/' + batchId);
+          const data = await resp.json();
+
+          // Master Progress Bar
+          docProgressFill.style.width = data.percent + '%';
+          docProgressPct.textContent = data.percent + '%';
+          docProgressStatus.innerHTML = `<i class="fa-solid fa-gear fa-spin text-neonCyan mr-1"></i> ${data.status}`;
+
+          // HUD telemetry
+          const curIdx = data.current_index || 0;
+          const totalBooks = data.total || selectedDocFiles.length;
+          document.getElementById('hud-pages').textContent = `${curIdx} / ${totalBooks} Books`;
+          document.getElementById('hud-speed').textContent = `Book ${curIdx} of ${totalBooks}`;
+          document.getElementById('hud-eta').textContent = data.done ? 'Finished!' : `${totalBooks - curIdx} Left`;
+          document.getElementById('hud-words').textContent = data.done ? '100% Complete' : `Active`;
+
+          // Live terminal log
+          if (data.status) {
+            const timeStr = new Date().toLocaleTimeString();
+            const logEntry = `<p class="text-slate-300"><span class="text-slate-500">[${timeStr}]</span> ${data.status}</p>`;
+            if (!docTerminalLogs.innerHTML.includes(data.status)) {
+              docTerminalLogs.innerHTML += logEntry;
+              docTerminalLogs.scrollTop = docTerminalLogs.scrollHeight;
+            }
+          }
+
+          // Update individual table rows
+          if (data.items && Array.isArray(data.items)) {
+            data.items.forEach((item, i) => {
+              const statusCell = document.getElementById(`queue-status-${i}`);
+              const actionCell = document.getElementById(`queue-action-${i}`);
+              if (!statusCell) return;
+
+              if (item.status === 'converting') {
+                statusCell.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-neonCyan text-[11px] font-mono flex items-center gap-1.5"><i class="fa-solid fa-spinner fa-spin"></i> Converting ${item.percent || 0}%</span>`;
+              } else if (item.status === 'done') {
+                statusCell.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-neonLime text-[11px] font-mono"><i class="fa-solid fa-circle-check mr-1"></i> Done (Saved)</span>`;
+                if (actionCell && item.out_filename) {
+                  actionCell.innerHTML = `<a href="/api/download/${encodeURIComponent(item.out_filename)}" download class="px-2 py-1 rounded bg-neonLime hover:bg-emerald-400 text-black font-black text-[10px] transition"><i class="fa-solid fa-download mr-1"></i> Save</a>`;
+                }
+              } else if (item.status === 'error') {
+                statusCell.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[11px] font-mono" title="${item.error || 'Error'}"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Error</span>`;
+              }
+            });
+          }
+
+          if (data.done) {
+            clearInterval(pollInterval);
+            docProgressFill.style.width = '100%';
+            docProgressPct.textContent = '100%';
+            docCancelBtn.classList.add('hidden');
+            docResultCard.classList.remove('hidden');
+            docResultFilename.textContent = `All ${totalBooks} books converted and saved to D:\\Apnp\\outputbook`;
+            docDownloadLink.href = '#history-section';
+            docDownloadLink.innerHTML = '<i class="fa-solid fa-folder-open mr-1"></i> View Output Books';
+            docReadNowBtn.classList.add('hidden');
+            docStartBtn.disabled = false;
+            showToast(`All ${totalBooks} books converted and saved to D:\\Apnp\\outputbook!`, 'success');
+            refreshCacheInfo();
+            if (typeof loadHistory === 'function') loadHistory();
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }, 900);
+    }
+
+    // ==========================================
+    // DIAGRAM STUDIO
+    // ==========================================
+    const imgDropzone = document.getElementById('img-dropzone');
+    const imgFileInput = document.getElementById('img-file-input');
+    const imgLoading = document.getElementById('img-loading');
+    const imgResultsArea = document.getElementById('img-results-area');
+    const imgBefore = document.getElementById('img-before');
+    const imgAfter = document.getElementById('img-after');
+    const sliderOverlay = document.getElementById('slider-overlay');
+    const sliderHandle = document.getElementById('slider-handle');
+    const sliderBox = document.getElementById('slider-box');
+
+    imgDropzone.addEventListener('click', () => imgFileInput.click());
+    imgFileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) processDiagramImage(e.target.files[0]);
+    });
+
+    async function processDiagramImage(file) {
+      imgDropzone.classList.add('hidden');
+      imgLoading.classList.remove('hidden');
+      imgResultsArea.classList.add('hidden');
+
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('source_lang', document.getElementById('doc-source-lang').value);
+      fd.append('target_lang', 'en');
+
+      try {
+        const resp = await fetch('/api/translate-diagram', { method: 'POST', body: fd });
+        const res = await resp.json();
+        
+        imgLoading.classList.add('hidden');
+        imgDropzone.classList.remove('hidden');
+        imgResultsArea.classList.remove('hidden');
+
+        imgBefore.src = res.original_image;
+        imgAfter.src = res.translated_image;
+        document.getElementById('img-download-btn').href = res.translated_image;
+        document.getElementById('img-boxes-count').textContent = res.count;
+
+        if (res.detections && res.detections.length > 0) {
+          document.getElementById('ocr-table-body').innerHTML = res.detections.map((d, i) => `
+            <tr class="hover:bg-cyberDark">
+              <td class="p-2.5 mono text-slate-500">${i + 1}</td>
+              <td class="p-2.5 font-bold text-rose-300">${d.original}</td>
+              <td class="p-2.5 font-bold text-neonCyan">${d.translated}</td>
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-neonLime/20 text-neonLime">${Math.round(d.confidence * 100)}%</span></td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('ocr-table-body').innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">No foreign text detected</td></tr>';
+        }
+
+        setSliderPosition(50);
+        showToast(`Inpainted ${res.count} boxes`, 'success');
+      } catch (err) {
+        imgLoading.classList.add('hidden');
+        imgDropzone.classList.remove('hidden');
+        showToast(err.message, 'error');
+      }
+    }
+
+    let isDraggingSlider = false;
+    function setSliderPosition(pct) {
+      pct = Math.max(0, Math.min(100, pct));
+      sliderOverlay.style.width = pct + '%';
+      sliderHandle.style.left = pct + '%';
+    }
+    sliderBox.addEventListener('mousedown', () => isDraggingSlider = true);
+    window.addEventListener('mouseup', () => isDraggingSlider = false);
+    sliderBox.addEventListener('mousemove', (e) => {
+      if (!isDraggingSlider) return;
+      const rect = sliderBox.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      setSliderPosition((x / rect.width) * 100);
+    });
+
+    // ==========================================
+    // BATCH 500-BOOKS CONVERTER
+    // ==========================================
+    function setBatchFolder(path) {
+      document.getElementById('batch-folder-input').value = path;
+      scanDirectory();
+    }
+
+    async function scanDirectory() {
+      const folderPath = document.getElementById('batch-folder-input').value.trim();
+      if (!folderPath) return;
+
+      const isRecursive = document.getElementById('batch-recursive-chk')?.checked ?? true;
+      const skipExisting = document.getElementById('batch-skip-existing-chk')?.checked ?? true;
+
+      try {
+        const resp = await fetch('/api/scan-folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folder_path: folderPath, recursive: isRecursive })
+        });
+        const data = await resp.json();
+        if (data.files) {
+          document.getElementById('batch-files-area').classList.remove('hidden');
+          const doneCount = data.files.filter(f => f.already_done).length;
+          document.getElementById('batch-count-badge').textContent = `${data.files.length} Books Found (${doneCount} Already Translated)`;
+          
+          document.getElementById('batch-table-body').innerHTML = data.files.map((f, i) => {
+            const isChecked = !(skipExisting && f.already_done);
+            const statusBadge = f.already_done
+              ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-neonLime/20 text-neonLime border border-neonLime/30"><i class="fa-solid fa-check mr-1"></i>TRANSLATED</span>`
+              : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">PENDING</span>`;
+
+            return `
+              <tr class="hover:bg-cyberDark transition">
+                <td class="p-3 text-center"><input type="checkbox" class="batch-file-chk" value="${f.path}" ${isChecked ? 'checked' : ''}></td>
+                <td class="p-3 font-bold text-white max-w-sm truncate" title="${f.path}">${f.display_name || f.name}</td>
+                <td class="p-3 uppercase text-[10px] font-black text-neonCyan">${f.ext.replace('.', '')}</td>
+                <td class="p-3 text-slate-400 mono">${f.size_str}</td>
+                <td class="p-3 text-neonLime mono">${f.pages > 0 ? f.pages + ' pages' : '-'}</td>
+                <td class="p-3">${statusBadge}</td>
+              </tr>
+            `;
+          }).join('');
+          showToast(`Found ${data.files.length} books across directories`, 'success');
+        }
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    function toggleSelectAllBatch() {
+      const master = document.getElementById('batch-check-all');
+      document.querySelectorAll('.batch-file-chk').forEach(c => c.checked = master.checked);
+    }
+
+    async function startBatchTranslation() {
+      const checkedBoxes = Array.from(document.querySelectorAll('.batch-file-chk:checked')).map(c => c.value);
+      if (checkedBoxes.length === 0) {
+        showToast('Select at least one book to translate', 'error');
+        return;
+      }
+      document.getElementById('batch-progress-box').classList.remove('hidden');
+      document.getElementById('batch-run-btn').disabled = true;
+
+      const engineMode = document.getElementById('batch-engine-mode')?.value || 'hybrid';
+      const skipExisting = document.getElementById('batch-skip-existing-chk')?.checked ?? true;
+
+      try {
+        const resp = await fetch('/api/start-batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            files: checkedBoxes,
+            source_lang: document.getElementById('doc-source-lang').value,
+            target_lang: 'en',
+            translate_images: (selectedSpeedMode !== 'hyper'),
+            engine_mode: engineMode,
+            skip_existing: skipExisting
+          })
+        });
+        const res = await resp.json();
+        if (res.batch_id) trackBatchProgress(res.batch_id);
+      } catch (e) {
+        showToast(e.message, 'error');
+        document.getElementById('batch-run-btn').disabled = false;
+      }
+    }
+
+    function trackBatchProgress(batchId) {
+      const timer = setInterval(async () => {
+        try {
+          const resp = await fetch('/api/batch-progress/' + batchId);
+          const data = await resp.json();
+          document.getElementById('batch-progress-fill').style.width = data.percent + '%';
+          document.getElementById('batch-status-pct').textContent = data.percent + '%';
+          document.getElementById('batch-status-text').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> ${data.status}`;
+          document.getElementById('batch-books-counter').textContent = `${data.current_index || 0} / ${data.total || 0} Books`;
+
+          if (data.current_file) {
+            document.getElementById('batch-current-file-label').textContent = data.current_file;
+          }
+          const subPct = data.current_sub_progress || 0;
+          document.getElementById('batch-sub-pct').textContent = subPct + '%';
+          document.getElementById('batch-sub-progress-fill').style.width = subPct + '%';
+
+          if (data.done) {
+            clearInterval(timer);
+            document.getElementById('batch-run-btn').disabled = false;
+            document.getElementById('batch-status-text').innerHTML = `<i class="fa-solid fa-check text-neonLime mr-2"></i> ${data.status}`;
+            showToast('All batch books completed successfully!', 'success');
+            loadLibrary();
+          }
+        } catch (e) {}
+      }, 1000);
+    }
+
+    // ==========================================
+    // READER & LIBRARY
+    // ==========================================
+    async function loadLibrary() {
+      try {
+        const resp = await fetch('/api/history');
+        const files = await resp.json();
+        const tbody = document.getElementById('library-table-body');
+        if (!files || files.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">No output books converted yet</td></tr>';
+          return;
+        }
+        tbody.innerHTML = files.map(f => `
+          <tr class="hover:bg-cyberDark transition">
+            <td class="p-3.5 flex items-center gap-3">
+              <i class="fa-solid ${f.ext === 'pdf' ? 'fa-file-pdf text-rose-400' : 'fa-book text-neonCyan'} text-lg"></i>
+              <span class="font-bold text-white">${f.name}</span>
+            </td>
+            <td class="p-3.5 uppercase text-[10px] font-black text-neonCyan">${f.ext}</td>
+            <td class="p-3.5 text-slate-400 mono">${f.size_str}</td>
+            <td class="p-3.5 text-slate-400">${f.time_str}</td>
+            <td class="p-3.5 text-right space-x-2">
+              ${f.ext === 'pdf' ? `
+                <button onclick="openReaderForFile('${encodeURIComponent(f.name)}')" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/40 text-neonCyan text-xs font-bold transition">
+                  <i class="fa-solid fa-book-open mr-1"></i> Read
+                </button>
+              ` : ''}
+              <a href="/api/download/${encodeURIComponent(f.name)}" download class="px-3 py-1.5 rounded-lg bg-neonLime/20 hover:bg-neonLime/40 text-neonLime text-xs font-bold transition inline-flex items-center">
+                <i class="fa-solid fa-download mr-1"></i> Download
+              </a>
+              <button onclick="deleteLibraryFile('${encodeURIComponent(f.name)}')" class="p-1.5 text-slate-500 hover:text-rose-400 transition">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    function openReaderForFile(filename) {
+      switchTab('reader-tab');
+      document.getElementById('reader-current-title').textContent = 'Reading: ' + decodeURIComponent(filename);
+      document.getElementById('pdf-viewer-frame').src = '/api/preview/' + filename;
+      document.getElementById('reader-viewer-container').classList.remove('hidden');
+      document.getElementById('reader-viewer-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeReaderViewer() {
+      document.getElementById('reader-viewer-container').classList.add('hidden');
+      document.getElementById('pdf-viewer-frame').src = '';
+    }
+
+    async function deleteLibraryFile(filename) {
+      if (!confirm('Delete ' + decodeURIComponent(filename) + '?')) return;
+      try {
+        await fetch('/api/delete-file/' + filename, { method: 'DELETE' });
+        showToast('File deleted', 'info');
+        loadLibrary();
+      } catch (e) {}
+    }
+
+    async function refreshCacheInfo() {
+      try {
+        const resp = await fetch('/api/cache-info');
+        const data = await resp.json();
+        document.getElementById('cache-count').textContent = `${data.count} cached phrases (${data.size_kb})`;
+      } catch (e) {}
+    }
+
+    refreshCacheInfo();
+    loadLibrary();
+  </script>
+</body>
+</html>

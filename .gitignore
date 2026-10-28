@@ -1,0 +1,33 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Translation cache (SQLite database)
+*.db
+*.db-shm
+*.db-wal
+translation_cache.db
+
+# Large uploads and translated outputs
+uploads/*
+!uploads/.gitkeep
+output/*
+!output/.gitkeep
+outputbook/*
+books/
+book/
+
+# Virtual Environments
+venv/
+env/
+.env
+.venv
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
