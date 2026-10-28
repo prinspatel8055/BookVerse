@@ -10,14 +10,29 @@ __pycache__/
 *.db-wal
 translation_cache.db
 
-# Large uploads and translated outputs
+# STRICT BOOK & DOCUMENT PROTECTION (User Privacy - Never Uploaded)
+*.pdf
+*.fb2
+*.epub
+*.mobi
+*.djvu
+*.azw3
+*.doc
+*.docx
+*.cbr
+*.cbz
+
+# Upload and output folders
 uploads/*
 !uploads/.gitkeep
 output/*
 !output/.gitkeep
+outputbook/
 outputbook/*
 books/
+books/*
 book/
+book/*
 
 # Virtual Environments
 venv/
